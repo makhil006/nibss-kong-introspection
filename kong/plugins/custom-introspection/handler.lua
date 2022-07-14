@@ -332,9 +332,9 @@ local function do_authentication(conf)
     ngx_set_header("x-consumer-custom-id", credential_obj.client_id)
 
     -- update upstream request body with bvn_data
-    -- local encoded_bvn_data = ngx.encode_args(credential_obj.bvn_data)
+    local encoded_bvn_data = ngx.encode_args(credential_obj.bvn_data)
     -- ngx.req.set_body_data(credential_obj.bvn_data)
-    kong.service.request.set_raw_body(credential_obj.bvn_data)
+    kong.service.request.set_raw_body(encoded_bvn_data)
 
     -- update path with bvn
     local new_path = conf.path
