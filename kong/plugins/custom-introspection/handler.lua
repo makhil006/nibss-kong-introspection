@@ -334,15 +334,17 @@ local function do_authentication(conf)
     -- update upstream request body with bvn_data
     -- local encoded_bvn_data = ngx.encode_args(credential_obj.bvn_data)
     local encoded_bvn_data = cjson.encode(credential_obj.bvn_data)
-    kong.log.notice(encoded_bvn_data)
+    kong.log.notice('===> encoded bvn_data body : '..encoded_bvn_data)
     -- ngx.req.set_body_data(credential_obj.bvn_data)
     kong.service.request.set_raw_body(encoded_bvn_data)
 
     -- update path with bvn
     local new_path = conf.path
     new_path = new_path..credential_obj.username
-    kong.log.debug("setting new path as: "..new_path)
+    kong.log.notice("===> setting new path as: "..new_path)
     set_path(new_path)
+
+    kong.log.notice('===> upstream host is : '..kong.request.get_host())
   end
 
   -- Set custom claims as upstream headers
