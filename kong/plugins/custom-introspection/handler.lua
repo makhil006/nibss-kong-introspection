@@ -348,6 +348,8 @@ local function do_authentication(conf)
 
     -- update upstream request body with bvn_data
     local encoded_bvn_data = cjson.encode(credential_obj.bvn_data)
+    encoded_bvn_data = encoded_bvn_data:gsub(",null", "")
+    encoded_bvn_data = encoded_bvn_data:gsub("null,", "")
     kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> encoded bvn_data to set as body: '..encoded_bvn_data)
     set_raw_body(encoded_bvn_data)
 
