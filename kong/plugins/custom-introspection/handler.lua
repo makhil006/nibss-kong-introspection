@@ -7,32 +7,37 @@
 
 -- Copyright (C) Kong Inc.
 
-local constants = require "kong.constants"
+local constants               = require "kong.constants"
 
-local utils = require "kong.tools.utils"
-local Multipart = require "multipart"
-local cjson = require "cjson.safe"
-local http = require "resty.http"
-local url = require "socket.url"
+local utils                   = require "kong.tools.utils"
+local Multipart               = require "multipart"
+local cjson                   = require "cjson.safe"
+local http                    = require "resty.http"
+local url                     = require "socket.url"
 
-local OAuth2Introspection = {}
+local OAuth2Introspection     = {}
 
-local CONTENT_TYPE = "content-type"
-local CONTENT_LENGTH = "content-length"
-local ACCESS_TOKEN = "access_token"
+local CONTENT_TYPE            = "content-type"
+local CONTENT_LENGTH          = "content-length"
+local ACCESS_TOKEN            = "access_token"
 
-local kong = kong
-local req_get_headers = ngx.req.get_headers
-local ngx_set_header = ngx.req.set_header
-local get_method = ngx.req.get_method
-local string_find = string.find
-local table_insert = table.insert
-local fmt = string.format
-local ngx_log = ngx.log
-local ERR = ngx.ERR
-local WARN = ngx.WARN
+local kong                    = kong
+local req_get_headers         = ngx.req.get_headers
+local ngx_set_header          = ngx.req.set_header
+local get_method              = ngx.req.get_method
+local string_find             = string.find
+local table_insert            = table.insert
+local fmt                     = string.format
+local ngx_log                 = ngx.log
+local ERR                     = ngx.ERR
+local WARN                    = ngx.WARN
 
-local set_path = kong.service.request.set_path
+local set_path                = kong.service.request.set_path
+local set_raw_body            = kong.service.request.set_raw_body
+local set_header              = kong.service.request.set_header
+local get_path                = kong.request.get_path
+local get_raw_body            = kong.request.get_raw_body
+local get_headers             = kong.request.get_headers
 
 local consumer_by_fields = {
   "username",
@@ -322,29 +327,41 @@ local function do_authentication(conf)
     local x_consumer_custom_id = req_get_headers()["x-consumer-custom-id"]
 
     if x_consumer_custom_id ~= credential_obj.client_id then
-      return false, { status=401,
-                      message = {error = "invalid_x_consumer_custom_id",
-                                  error_description = "The x-consumer-custom-id is invalid"},
-                      headers = {["WWW-Authenticate"] = 'Bearer realm="service" error="invalid_x_consumer_custom_id" error_description="The x-consumer-custom-id is invalid"'}}
+      return false, { 
+                      status=401,
+                      message = {
+                        error = "invalid_x_consumer_custom_id",
+                        error_description = "The x-consumer-custom-id is invalid"
+                      },
+                      headers = {
+                        ["WWW-Authenticate"] = 'Bearer realm="service" error="invalid_x_consumer_custom_id" error_description="The x-consumer-custom-id is invalid"'
+                      }
+                    }
     end
                  
     -- set header if matched
-    ngx_set_header("x-consumer-custom-id", credential_obj.client_id)
+    kong.log.debug('===> client ID matches. Setting it as header and proceeding ...')
+    set_header("x-consumer-custom-id", credential_obj.client_id)
+
+    -- transaction ID
+    set_header("x-transaction -id", credential_obj._tx_id)
 
     -- update upstream request body with bvn_data
-    -- local encoded_bvn_data = ngx.encode_args(credential_obj.bvn_data)
     local encoded_bvn_data = cjson.encode(credential_obj.bvn_data)
-    kong.log.notice('===> encoded bvn_data body : '..encoded_bvn_data)
-    -- ngx.req.set_body_data(credential_obj.bvn_data)
-    kong.service.request.set_raw_body(encoded_bvn_data)
+    kong.log.debug('===> encoded bvn_data to set as body: '..encoded_bvn_data)
+    set_raw_body(encoded_bvn_data)
 
     -- update path with bvn
     local new_path = conf.path
     new_path = new_path..credential_obj.username
-    kong.log.notice("===> setting new path as: "..new_path)
+    kong.log.debug("===> setting new path as: "..new_path)
     set_path(new_path)
 
-    kong.log.notice('===> upstream host is : '..kong.request.get_host())
+    ----- DEBUG REQUEST
+    kong.log.debug('===> upstream request PATH is: '..get_path())
+    kong.log.debug('===> upstream request RAW BODY is: '..get_raw_body())
+    kong.log.debug('===> upstream request HEADERS are: '..cjson.encode(get_headers()))
+
   end
 
   -- Set custom claims as upstream headers
