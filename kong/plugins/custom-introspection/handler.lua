@@ -361,10 +361,8 @@ local function do_authentication(conf)
     set_path(new_path)
 
     kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> ----- DEBUGGING REQUEST -----')
-    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> upstream request PATH is: '..get_path())
-    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> upstream request QUERY are: '..cjson.encode(get_query()))
-    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> upstream request RAW BODY is: '..get_raw_body())
-    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> upstream request HEADERS are: '..cjson.encode(get_headers()))
+    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> New upstream request RAW BODY is: '..get_raw_body())
+    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> New upstream request HEADERS are: '..cjson.encode(get_headers()))
 
   end
 
