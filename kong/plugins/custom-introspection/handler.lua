@@ -340,7 +340,7 @@ local function do_authentication(conf)
     end
                  
     -- set header if matched
-    kong.log.debug('===> client ID matches. Setting it as header and proceeding ...')
+    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> client ID matches. Setting it as header and proceeding ...')
     set_header("x-consumer-custom-id", credential_obj.client_id)
 
     -- transaction ID
@@ -348,19 +348,19 @@ local function do_authentication(conf)
 
     -- update upstream request body with bvn_data
     local encoded_bvn_data = cjson.encode(credential_obj.bvn_data)
-    kong.log.debug('===> encoded bvn_data to set as body: '..encoded_bvn_data)
+    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> encoded bvn_data to set as body: '..encoded_bvn_data)
     set_raw_body(encoded_bvn_data)
 
     -- update path with bvn
     local new_path = conf.path
     new_path = new_path..credential_obj.username
-    -- kong.log.debug("===> setting new path as: "..new_path)
-    -- set_path(new_path)
+    kong.log.debug("CUSTOM_INTROSPECTION_PLUGIN ===> setting new path as: "..new_path)
+    set_path(new_path)
 
-    ----- DEBUG REQUEST
-    kong.log.debug('===> upstream request PATH is: '..get_path())
-    kong.log.debug('===> upstream request RAW BODY is: '..get_raw_body())
-    kong.log.debug('===> upstream request HEADERS are: '..cjson.encode(get_headers()))
+    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> ----- DEBUGGING REQUEST -----')
+    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> upstream request PATH is: '..get_path())
+    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> upstream request RAW BODY is: '..get_raw_body())
+    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> upstream request HEADERS are: '..cjson.encode(get_headers()))
 
   end
 
