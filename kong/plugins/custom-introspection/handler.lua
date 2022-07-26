@@ -344,7 +344,7 @@ local function do_authentication(conf)
     set_header("x-consumer-custom-id", credential_obj.client_id)
 
     -- transaction ID
-    set_header("x-transaction -id", credential_obj._tx_id)
+    set_header("x-transaction-id", credential_obj._tx_id)
 
     -- update upstream request body with bvn_data
     local encoded_bvn_data = cjson.encode(credential_obj.bvn_data)
@@ -354,8 +354,8 @@ local function do_authentication(conf)
     -- update path with bvn
     local new_path = conf.path
     new_path = new_path..credential_obj.username
-    kong.log.debug("===> setting new path as: "..new_path)
-    set_path(new_path)
+    -- kong.log.debug("===> setting new path as: "..new_path)
+    -- set_path(new_path)
 
     ----- DEBUG REQUEST
     kong.log.debug('===> upstream request PATH is: '..get_path())
