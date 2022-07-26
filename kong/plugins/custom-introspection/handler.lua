@@ -36,6 +36,7 @@ local set_path                = kong.service.request.set_path
 local set_raw_body            = kong.service.request.set_raw_body
 local set_header              = kong.service.request.set_header
 local get_path                = kong.request.get_path
+local get_query                = kong.request.get_query
 local get_raw_body            = kong.request.get_raw_body
 local get_headers             = kong.request.get_headers
 
@@ -361,6 +362,7 @@ local function do_authentication(conf)
 
     kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> ----- DEBUGGING REQUEST -----')
     kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> upstream request PATH is: '..get_path())
+    kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> upstream request QUERY are: '..cjson.encode(get_query()))
     kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> upstream request RAW BODY is: '..get_raw_body())
     kong.log.debug('CUSTOM_INTROSPECTION_PLUGIN ===> upstream request HEADERS are: '..cjson.encode(get_headers()))
 
